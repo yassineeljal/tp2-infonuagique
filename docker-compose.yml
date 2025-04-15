@@ -1,0 +1,54 @@
+services:
+  mariadb:
+    image: mariadb
+    networks:
+      - pixios-network
+    volumes:
+      - db:/var/lib/mysql
+      - ./projet_backend/mariadb-seed:/docker-entrypoint-initdb.d
+    environment:
+      - MYSQL_ROOT_PASSWORD=1212
+      - MYSQL_DATABASE=pixios
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=1212
+    ports: 
+      - "3306:3306"
+   
+ 
+
+ 
+  backend:
+      image: yassineeljall/tp2-2387923-6225454-backend:v1
+      build:
+        context: ./projet_backend
+      networks:
+        - pixios-network
+      depends_on:
+        - mariadb
+      ports:
+        - "8888:8888"
+      environment:
+        - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3306/pixios
+        - SERVER_PORT=8888
+        - SPRING_DATASOURCE_USERNAME=root
+        - SPRING_DATASOURCE_PASSWORD=1212
+        # - SPRING_DATASOURCE_DATABASE=pixios
+ 
+  frontend:
+    image: yassineeljall/tp2-2387923-6225454-frontend:v2
+    build:
+      context: ./Projet/frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - pixios-network
+
+
+volumes:
+ db:
+ 
+networks:
+  pixios-network:
+    driver: bridge
